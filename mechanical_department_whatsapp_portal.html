@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanical Department WhatsApp Data Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        industrial: {
+                            50: '#f0f5fa',
+                            100: '#d9e6f2',
+                            500: '#1e40af',
+                            600: '#1d4ed8',
+                            700: '#1e3a8a',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar and animations */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            cbd: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- Main Layout Wrapper -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="bg-slate-900 text-slate-300 w-64 flex-shrink-0 flex flex-col transition-all duration-300 z-30 fixed inset-y-0 left-0 lg:static -translate-x-full lg:translate-x-0 shadow-xl">
+            <!-- Sidebar Header -->
+            <div class="h-16 flex items-center px-6 bg-slate-950 border-b border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 text-white p-2 rounded-lg shadow-md">
+                        <i class="fa-solid fa-train text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-white text-sm tracking-wide">RAILWAY MECH PORTAL</h1>
+                        <p class="text-xs text-slate-400">WhatsApp Data Engine v2.4</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+                <a href="#dashboard" onclick="switchTab('dashboard')" class="nav-link flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all bg-blue-600 text-white shadow-md group" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie w-6 text-center text-blue-200 group-hover:text-white transition-colors"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#upload" onclick="switchTab('upload')" class="nav-link flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all text-slate-300 hover:bg-slate-800 hover:text-white group" data-tab="upload">
+                    <i class="fa-solid fa-cloud-arrow-up w-6 text-center text-slate-400 group-hover:text-white transition-colors"></i>
+                    <span>Data Upload & Parse</span>
+                    <span class="ml-auto bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">AI</span>
+                </a>
+                <a href="#database" onclick="switchTab('database')" class="nav-link flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all text-slate-300 hover:bg-slate-800 hover:text-white group" data-tab="database">
+                    <i class="fa-solid fa-database w-6 text-center text-slate-400 group-hover:text-white transition-colors"></i>
+                    <span>Database Search</span>
+                    <span id="db-badge" class="ml-auto bg-slate-800 text-slate-300 text-xs px-2 py-0.5 rounded-full font-semibold">0</span>
+                </a>
+                <a href="#reports" onclick="switchTab('reports')" class="nav-link flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all text-slate-300 hover:bg-slate-800 hover:text-white group" data-tab="reports">
+                    <i class="fa-solid fa-file-lines w-6 text-center text-slate-400 group-hover:text-white transition-colors"></i>
+                    <span>Basic Reports</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Status -->
+            <div class="p-4 bg-slate-950 border-t border-slate-800">
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <span class="flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="font-medium text-slate-300">System Online</span>
+                    </span>
+                    <span class="bg-slate-800 px-2 py-1 rounded text-slate-400 font-mono">Stage 1</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <!-- Top Navbar -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-20 flex-shrink-0 shadow-xs">
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden text-slate-600 hover:text-slate-900 focus:outline-hidden p-2">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                    <div>
+                        <h2 id="page-title" class="text-lg font-bold text-slate-800">Dashboard Overview</h2>
+                        <p class="text-xs text-slate-500 hidden sm:block">Mechanical Department Daily WhatsApp Intelligence & Organisation Hub</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <button onclick="loadSampleData()" class="hidden sm:inline-flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-semibold transition-colors border border-slate-200">
+                        <i class="fa-solid fa-rotate-right text-slate-500"></i>
+                        <span>Reset/Load Demo Data</span>
+                    </button>
+                    <div class="h-6 w-px bg-slate-200"></div>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
+                            SR
+                        </div>
+                        <div class="hidden md:block text-left">
+                            <p class="text-xs font-bold text-slate-700">Sr. Section Engineer</p>
+                            <p class="text-[10px] text-slate-500">Central Yard Depot</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Viewport -->
+            <main class="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-100">
+
+                <!-- ================= TAB 1: DASHBOARD ================= -->
+                <div id="tab-dashboard" class="tab-content space-y-6 fade-in">
+                    <!-- Summary Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <!-- Total Records Card -->
+                        <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Records</p>
+                                <h3 id="stat-total" class="text-3xl font-extrabold text-slate-900 mt-1">0</h3>
+                                <p class="text-xs text-emerald-600 font-semibold mt-2 flex items-center">
+                                    <i class="fa-solid fa-arrow-trend-up mr-1"></i> +12% from last week
+                                </p>
+                            </div>
+                            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-clipboard-list"></i>
+                            </div>
+                        </div>
+
+                        <!-- Unique Wagons Card -->
+                        <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Unique Wagons</p>
+                                <h3 id="stat-wagons" class="text-3xl font-extrabold text-slate-900 mt-1">0</h3>
+                                <p class="text-xs text-slate-500 font-medium mt-2">Active rolling stock</p>
+                            </div>
+                            <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-train-subway"></i>
+                            </div>
+                        </div>
+
+                        <!-- Active Failures Card -->
+                        <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Defects</p>
+                                <h3 id="stat-failures" class="text-3xl font-extrabold text-rose-600 mt-1">0</h3>
+                                <p class="text-xs text-rose-600 font-semibold mt-2 flex items-center">
+                                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Requires attention
+                                </p>
+                            </div>
+                            <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                        </div>
+
+                        <!-- Duplicates Prevented Card -->
+                        <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 flex items-center justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Duplicates Blocked</p>
+                                <h3 id="stat-duplicates" class="text-3xl font-extrabold text-amber-600 mt-1">0</h3>
+                                <p class="text-xs text-amber-600 font-semibold mt-2 flex items-center">
+                                    <i class="fa-solid fa-shield-halved mr-1"></i> 100% data integrity
+                                </p>
+                            </div>
+                            <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                                <i class="fa-solid fa-clone"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Chart 1: Failures by Component -->
+                        <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-slate-800 text-base">Component-wise Failure Breakdown</h3>
+                                <span class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-md">Live Analytics</span>
+                            </div>
+                            <div class="h-72 relative flex items-center justify-center">
+                                <canvas id="componentChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 2: Daily Upload & Defect Trend -->
+                        <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-slate-800 text-base">Daily WhatsApp Report Intake Trend</h3>
+                                <span class="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-md">Last 7 Days</span>
+                            </div>
+                            <div class="h-72 relative flex items-center justify-center">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Ingestion Table Preview -->
+                    <div class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 text-base">Recently Processed WhatsApp Records</h3>
+                            <button onclick="switchTab('database')" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center space-x-1">
+                                <span>View Full Database</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wider border-b border-slate-200">
+                                        <th class="py-3 px-6">Date</th>
+                                        <th class="py-3 px-6">Wagon Number</th>
+                                        <th class="py-3 px-6">Wagon Type</th>
+                                        <th class="py-3 px-6">Component</th>
+                                        <th class="py-3 px-6">Defect / Failure</th>
+                                        <th class="py-3 px-6">Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-records-tbody" class="divide-y divide-slate-100 text-slate-700">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 2: DATA UPLOAD & EXTRACTION ================= -->
+                <div id="tab-upload" class="tab-content space-y-6 hidden fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Upload Card -->
+                        <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 space-y-6">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-lg">Upload WhatsApp Chat Export</h3>
+                                <p class="text-xs text-slate-500 mt-1">Upload exported `.txt` or `.csv` files from mechanical department WhatsApp groups.</p>
+                            </div>
+
+                            <!-- Drop Zone -->
+                            <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-6 text-center cursor-pointer transition-colors bg-slate-50 hover:bg-blue-50/50 group" onclick="document.getElementById('file-input').click()">
+                                <input type="file" id="file-input" class="hidden" accept=".txt,.csv" onchange="handleFileSelect(event)">
+                                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl mx-auto flex items-center justify-center text-2xl mb-3 group-hover:scale-105 transition-transform">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-700">Click to upload or drag & drop</p>
+                                <p class="text-xs text-slate-400 mt-1">WhatsApp Chat (.txt) or CSV Export</p>
+                            </div>
+
+                            <!-- OR Paste Raw Chat Area -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Or Paste Raw WhatsApp Text:</label>
+                                <textarea id="raw-chat-input" rows="5" class="w-full text-xs font-mono p-3 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500 bg-slate-50" placeholder="[14/06/2026, 08:30] Depot Supervisor: Wagon BOXN-22415 Braking System failure at Yard 4..."></textarea>
+                            </div>
+
+                            <div class="flex items-center space-x-3">
+                                <button onclick="simulateExtraction()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl text-sm shadow-md transition-all flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    <span>Run AI Extraction</span>
+                                </button>
+                                <button onclick="loadSampleChatPaste()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-3 rounded-xl text-xs transition-colors border border-slate-200" title="Load Sample Chat">
+                                    <i class="fa-solid fa-file-code"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Extraction Preview & Duplicate Prevention Panel -->
+                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 space-y-6 flex flex-col">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-lg">Auto-Extraction & Validation Preview</h3>
+                                    <p class="text-xs text-slate-500">System inspects records, classifies categories, and flags potential duplicates.</p>
+                                </div>
+                                <div id="extraction-status-badge" class="hidden px-3 py-1 bg-amber-50 text-amber-700 text-xs font-bold rounded-full border border-amber-200">
+                                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="duplicate-warning-count">0</span> Duplicates Flagged
+                                </div>
+                            </div>
+
+                            <!-- Preview Table -->
+                            <div class="flex-1 overflow-x-auto min-h-[250px] border border-slate-200 rounded-xl">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-200">
+                                            <th class="py-3 px-4">Status</th>
+                                            <th class="py-3 px-4">Date</th>
+                                            <th class="py-3 px-4">Wagon Number</th>
+                                            <th class="py-3 px-4">Type</th>
+                                            <th class="py-3 px-4">Component</th>
+                                            <th class="py-3 px-4">Defect/Failure</th>
+                                            <th class="py-3 px-4">Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="preview-tbody" class="divide-y divide-slate-100 text-slate-700">
+                                        <tr>
+                                            <td colspan="7" class="py-12 text-center text-slate-400">
+                                                <i class="fa-solid fa-inbox text-3xl mb-2 block"></i>
+                                                No chat data loaded yet. Upload a file or paste raw WhatsApp logs to begin extraction.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Action bar -->
+                            <div class="flex items-center justify-between pt-2">
+                                <p id="preview-summary-text" class="text-xs text-slate-500 font-medium">Ready for ingestion.</p>
+                                <button id="btn-ingest" onclick="confirmIngestion()" disabled class="bg-slate-300 text-slate-500 cursor-not-allowed font-bold py-3 px-6 rounded-xl text-sm transition-all shadow-sm flex items-center space-x-2">
+                                    <i class="fa-solid fa-database"></i>
+                                    <span>Ingest to Central Database</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 3: SEARCH & RETRIEVAL DATABASE ================= -->
+                <div id="tab-database" class="tab-content space-y-6 hidden fade-in">
+                    <div class="bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 space-y-5">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-lg">Central Mechanical Database</h3>
+                                <p class="text-xs text-slate-500">Search and filter structured failure records across all uploaded WhatsApp logs.</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <button onclick="exportDatabaseCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors border border-slate-200 flex items-center space-x-2">
+                                    <i class="fa-solid fa-download"></i>
+                                    <span>Export CSV</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Search & Filters Bar -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2">
+                            <!-- Global Search -->
+                            <div class="relative lg:col-span-2">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </span>
+                                <input type="text" id="search-input" oninput="filterDatabase()" placeholder="Search wagon number, component, defect..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500 bg-slate-50">
+                            </div>
+
+                            <!-- Wagon Type Filter -->
+                            <div>
+                                <select id="filter-type" onchange="filterDatabase()" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium text-slate-700">
+                                    <option value="">All Wagon Types</option>
+                                    <option value="BOXN">BOXN</option>
+                                    <option value="BCNA">BCNA</option>
+                                    <option value="BOBYN">BOBYN</option>
+                                    <option value="BTPN">BTPN</option>
+                                    <option value="BVZI">BVZI</option>
+                                </select>
+                            </div>
+
+                            <!-- Component Filter -->
+                            <div>
+                                <select id="filter-component" onchange="filterDatabase()" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium text-slate-700">
+                                    <option value="">All Components</option>
+                                    <option value="Braking System">Braking System</option>
+                                    <option value="Coupler (CBC)">Coupler (CBC)</option>
+                                    <option value="Wheel Set & Axle">Wheel Set & Axle</option>
+                                    <option value="Suspension">Suspension</option>
+                                    <option value="Door Latch">Door Latch</option>
+                                    <option value="Side Wall Panel">Side Wall Panel</option>
+                                </select>
+                            </div>
+
+                            <!-- Date Range Filter -->
+                            <div>
+                                <select id="filter-date" onchange="filterDatabase()" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500 bg-slate-50 font-medium text-slate-700">
+                                    <option value="">All Time Dates</option>
+                                    <option value="today">Today</option>
+                                    <option value="7days">Last 7 Days</option>
+                                    <option value="30days">Last 30 Days</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Database Table -->
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-200">
+                                        <th class="py-3 px-4">Date</th>
+                                        <th class="py-3 px-4">Wagon Number</th>
+                                        <th class="py-3 px-4">Type</th>
+                                        <th class="py-3 px-4">Component</th>
+                                        <th class="py-3 px-4">Defect / Failure</th>
+                                        <th class="py-3 px-4">Location</th>
+                                        <th class="py-3 px-4 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="database-tbody" class="divide-y divide-slate-100 text-slate-700">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Table Pagination / Count Footer -->
+                        <div class="flex items-center justify-between text-xs text-slate-500 pt-2">
+                            <span id="db-record-count">Showing 0 records</span>
+                            <div class="flex items-center space-x-2">
+                                <button class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 font-semibold hover:bg-slate-50">Previous</button>
+                                <span class="px-3 py-1.5 rounded-lg bg-blue-600 text-white font-bold">1</span>
+                                <button class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 font-semibold hover:bg-slate-50">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= TAB 4: BASIC REPORTING ================= -->
+                <div id="tab-reports" class="tab-content space-y-6 hidden fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Report Summary Card -->
+                        <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 space-y-5">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-lg">Report Generator</h3>
+                                <p class="text-xs text-slate-500">Generate automated summaries and analytical breakdowns for senior management.</p>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Report Category</label>
+                                    <select id="report-type" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-blue-500">
+                                        <option value="component">Component-wise Failure Summary</option>
+                                        <option value="wagon">Wagon-wise Incident Frequency</option>
+                                        <option value="date">Date-wise Ingestion Report</option>
+                                        <option value="location">Location / Yard Breakdown</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Time Period</label>
+                                    <select id="report-period" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-medium text-slate-700 bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-blue-500">
+                                        <option value="all">All Available Records</option>
+                                        <option value="week">Current Week</option>
+                                        <option value="month">Current Month</option>
+                                    </select>
+                                </div>
+
+                                <button onclick="generateReport()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl text-sm shadow-md transition-all flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                    <span>Generate Report</span>
+                                </button>
+                            </div>
+
+                            <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                                <div class="flex items-start space-x-3">
+                                    <i class="fa-solid fa-circle-info text-blue-600 mt-0.5"></i>
+                                    <p class="text-xs text-blue-900 leading-relaxed">
+                                        Reports aggregate verified WhatsApp logs from designated mechanical department groups into official format suitable for DRM review.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Report Output Panel -->
+                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-xs border border-slate-200/80 space-y-5 flex flex-col">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                                <div>
+                                    <h3 id="report-output-title" class="font-bold text-slate-800 text-base">Component-wise Failure Summary</h3>
+                                    <p class="text-xs text-slate-500">Aggregated statistical breakdown</p>
+                                </div>
+                                <button onclick="printReport()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-slate-200 flex items-center space-x-1.5">
+                                    <i class="fa-solid fa-print"></i>
+                                    <span>Print / Export PDF</span>
+                                </button>
+                            </div>
+
+                            <div class="flex-1 overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider border-b border-slate-200">
+                                            <th class="py-3 px-4" id="rep-col-1">Category / Component</th>
+                                            <th class="py-3 px-4 text-center">Total Incidents</th>
+                                            <th class="py-3 px-4 text-center">Percentage Share</th>
+                                            <th class="py-3 px-4">Severity Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="report-tbody" class="divide-y divide-slate-100 text-slate-700">
+                                        <!-- Populated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Record Details / Attachment Modal -->
+    <div id="detail-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs hidden fade-in">
+        <div class="bg-white rounded-2xl max-w-lg w-full mx-4 shadow-2xl overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+                <h3 class="font-bold text-sm tracking-wide flex items-center space-x-2">
+                    <i class="fa-solid fa-train text-blue-400"></i>
+                    <span>Wagon Incident Details</span>
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="modal-body" class="p-6 space-y-4 text-xs text-slate-700">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end space-x-3">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-semibold transition-colors">Close</button>
+                <button onclick="simulateAttachmentDownload()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors flex items-center space-x-1.5">
+                    <i class="fa-solid fa-paperclip"></i>
+                    <span>Download Attachment (JPG/PDF)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- Mock Database & Initial State ---
+        let databaseRecords = [
+            { id: 1, date: "2026-06-10", wagonNumber: "BOXN-22415", wagonType: "BOXN", component: "Braking System", defect: "Brake binding noticed, cylinder stuck", location: "Yard 4", duplicate: false, sourceText: "[10/06/2026, 08:30] Rajesh Kumar: Wagon BOXN-22415 Braking System failure at Yard 4, brake binding noticed." },
+            { id: 2, date: "2026-06-11", wagonNumber: "BCNA-44120", wagonType: "BCNA", component: "Coupler (CBC)", defect: "Center buffer coupler draft gear slackness", location: "Platform 2 Siding", duplicate: false, sourceText: "[11/06/2026, 10:15] Amit Singh: Wagon BCNA-44120 Coupler (CBC) slackness observed at Platform 2 Siding." },
+            { id: 3, date: "2026-06-11", wagonNumber: "BOBYN-11029", wagonType: "BOBYN", component: "Wheel Set & Axle", defect: "Hot axle box detected during rolling pass", location: "Km Post 142/3", duplicate: false, sourceText: "[11/06/2026, 14:20] Suresh Patel: Wagon BOBYN-11029 Wheel Set & Axle hot axle box detected at Km Post 142/3." },
+            { id: 4, date: "2026-06-12", wagonNumber: "BTPN-88392", wagonType: "BTPN", component: "Suspension", defect: "Snubber spring broken on secondary stage", location: "Oil Terminal Yard", duplicate: false, sourceText: "[12/06/2026, 09:05] Manoj Varma: Wagon BTPN-88392 Suspension spring broken at Oil Terminal Yard." },
+            { id: 5, date: "2026-06-12", wagonNumber: "BOXN-55190", wagonType: "BOXN", component: "Door Latch", defect: "Side door latch mechanism jammed", location: "Goods Shed Line 3", duplicate: false, sourceText: "[12/06/2026, 16:40] R. K. Sharma: Wagon BOXN-55190 Door Latch jammed at Goods Shed Line 3." },
+            { id: 6, date: "2026-06-13", wagonNumber: "BVZI-99214", wagonType: "BVZI", component: "Side Wall Panel", defect: "Corrosion and puncture near bottom chord", location: "Washable Apron 1", duplicate: false, sourceText: "[13/06/2026, 11:10] D. K. Mishra: Wagon BVZI-99214 Side Wall Panel corrosion at Washable Apron 1." },
+            { id: 7, date: "2026-06-14", wagonNumber: "BOXN-22415", wagonType: "BOXN", component: "Braking System", defect: "Duplicate report: Brake binding cylinder check", location: "Yard 4", duplicate: true, sourceText: "[14/06/2026, 08:32] Rajesh Kumar: Wagon BOXN-22415 Braking System failure at Yard 4 (re-check)." }
+        ];
+
+        let duplicatesPreventedCount = 3;
+        let previewParsedRecords = [];
+        let componentChartInstance = null;
+        let trendChartInstance = null;
+
+        // --- Initialization on Load ---
+        window.onload = function() {
+            renderDashboard();
+            renderDatabaseTable();
+            renderReportsTable();
+        };
+
+        // --- Tab Switching Logic ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                el.classList.add('text-slate-300', 'hover:bg-slate-800', 'hover:text-white');
+            });
+
+            const activeLink = document.querySelector(`[data-tab="${tabId}"]`);
+            if(activeLink) {
+                activeLink.classList.remove('text-slate-300', 'hover:bg-slate-800', 'hover:text-white');
+                activeLink.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+            }
+
+            const titles = {
+                'dashboard': 'Dashboard Overview',
+                'upload': 'Data Upload & AI Extraction Module',
+                'database': 'Central Mechanical Database Search',
+                'reports': 'Basic Departmental Reports & Analytics'
+            };
+            document.getElementById('page-title').innerText = titles[tabId] || 'Portal';
+
+            // Re-render charts if dashboard is opened to ensure responsiveness
+            if(tabId === 'dashboard') {
+                renderDashboardCharts();
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        // --- Dashboard Rendering & Charts ---
+        function renderDashboard() {
+            const nonDuplicateRecords = databaseRecords.filter(r => !r.duplicate);
+            const uniqueWagons = new Set(nonDuplicateRecords.map(r => r.wagonNumber)).size;
+
+            document.getElementById('stat-total').innerText = nonDuplicateRecords.length;
+            document.getElementById('stat-wagons').innerText = uniqueWagons;
+            document.getElementById('stat-failures').innerText = nonDuplicateRecords.length; // active
+            document.getElementById('stat-duplicates').innerText = duplicatesPreventedCount;
+            document.getElementById('db-badge').innerText = nonDuplicateRecords.length;
+
+            // Render Recent Table
+            const tbody = document.getElementById('recent-records-tbody');
+            tbody.innerHTML = '';
+            nonDuplicateRecords.slice(-5).reverse().forEach(r => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-3 px-6 font-mono text-xs">${r.date}</td>
+                        <td class="py-3 px-6 font-bold text-blue-600">${r.wagonNumber}</td>
+                        <td class="py-3 px-6"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-xs">${r.wagonType}</span></td>
+                        <td class="py-3 px-6">${r.component}</td>
+                        <td class="py-3 px-6 text-slate-600 truncate max-w-xs">${r.defect}</td>
+                        <td class="py-3 px-6 font-medium">${r.location}</td>
+                    </tr>
+                `;
+            });
+
+            renderDashboardCharts();
+        }
+
+        function renderDashboardCharts() {
+            const nonDuplicates = databaseRecords.filter(r => !r.duplicate);
+            
+            // Component Counts
+            const compCounts = {};
+            nonDuplicates.forEach(r => {
+                compCounts[r.component] = (compCounts[r.component] || 0) + 1;
+            });
+
+            const compLabels = Object.keys(compCounts);
+            const compData = Object.values(compCounts);
+
+            // Destroy previous if exists
+            if(componentChartInstance) componentChartInstance.destroy();
+            const ctxComp = document.getElementById('componentChart').getContext('2d');
+            componentChartInstance = new Chart(ctxComp, {
+                type: 'doughnut',
+                data: {
+                    labels: compLabels,
+                    datasets: [{
+                        data: compData,
+                        backgroundColor: ['#1e40af', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#1e3a8a']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+
+            // Trend Chart
+            if(trendChartInstance) trendChartInstance.destroy();
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            trendChartInstance = new Chart(ctxTrend, {
+                type: 'bar',
+                data: {
+                    labels: ['Jun 08', 'Jun 09', 'Jun 10', 'Jun 11', 'Jun 12', 'Jun 13', 'Jun 14'],
+                    datasets: [{
+                        label: 'WhatsApp Reports Ingested',
+                        data: [1, 2, 3, 4, 3, 2, 2],
+                        backgroundColor: '#1d4ed8',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+
+        // --- Upload & Extraction Logic ---
+        function loadSampleChatPaste() {
+            const sampleText = `[14/06/2026, 08:30] Rajesh Kumar: Wagon BOXN-22415 Braking System failure at Yard 4, brake binding noticed.
+[14/06/2026, 09:12] Amit Singh: Wagon BCNA-77219 Coupler (CBC) draft gear slackness at Yard 2.
+[14/06/2026, 10:05] Suresh Patel: Wagon BOBYN-33102 Wheel Set & Axle hot axle box detected at Main Line 1.
+[14/06/2026, 10:30] Rajesh Kumar: Wagon BOXN-22415 Braking System failure at Yard 4 (Duplicate entry test).`;
+            document.getElementById('raw-chat-input').value = sampleText;
+            showToast("Sample WhatsApp chat loaded successfully!", "info");
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('raw-chat-input').value = e.target.result;
+                showToast(`File "${file.name}" loaded into raw text buffer.`, "success");
+            };
+            reader.readAsText(file);
+        }
+
+        function simulateExtraction() {
+            const rawText = document.getElementById('raw-chat-input').value.trim();
+            if(!rawText) {
+                showToast("Please enter or upload WhatsApp chat text first.", "error");
+                return;
+            }
+
+            const lines = rawText.split('\n');
+            previewParsedRecords = [];
+            let duplicateFlagCount = 0;
+
+            lines.forEach((line, index) => {
+                if(!line.includes('Wagon') && !line.includes('wagon')) return;
+
+                // Simple regex extraction simulation
+                const dateMatch = line.match(/\[(\d{2}\/\d{2}\/\d{4})/);
+                const dateVal = dateMatch ? dateMatch[1].split('/').reverse().join('-') : '2026-06-14';
+
+                const wagonMatch = line.match(/(BOXN|BCNA|BOBYN|BTPN|BVZI)-?\d+/i);
+                const wagonNum = wagonMatch ? wagonMatch[0].toUpperCase() : `BOXN-${10000 + index}`;
+                const wagonType = wagonNum.split('-')[0];
+
+                let component = "Braking System";
+                if(line.toLowerCase().includes('coupler')) component = "Coupler (CBC)";
+                else if(line.toLowerCase().includes('wheel') || line.toLowerCase().includes('axle')) component = "Wheel Set & Axle";
+                else if(line.toLowerCase().includes('suspension')) component = "Suspension";
+                else if(line.toLowerCase().includes('door')) component = "Door Latch";
+                else if(line.toLowerCase().includes('wall')) component = "Side Wall Panel";
+
+                // Check against existing database for duplication
+                const isDuplicate = databaseRecords.some(r => r.wagonNumber === wagonNum && r.defect.toLowerCase().includes(component.toLowerCase().substring(0, 5)));
+                
+                if(isDuplicate) duplicateFlagCount++;
+
+                previewParsedRecords.push({
+                    tempId: index + 1,
+                    date: dateVal,
+                    wagonNumber: wagonNum,
+                    wagonType: wagonType,
+                    component: component,
+                    defect: line.split(':').pop().trim() || "General mechanical defect noted",
+                    location: line.includes('at') ? line.split('at')[1].trim() : 'Central Yard',
+                    duplicate: isDuplicate,
+                    sourceText: line
+                });
+            });
+
+            if(previewParsedRecords.length === 0) {
+                // fallback mock parse if lines don't match strict format
+                previewParsedRecords.push({
+                    tempId: 1,
+                    date: "2026-06-14",
+                    wagonNumber: "BOXN-99102",
+                    wagonType: "BOXN",
+                    component: "Braking System",
+                    defect: rawText.substring(0, 50) + "...",
+                    location: "Yard 1",
+                    duplicate: false,
+                    sourceText: rawText
+                });
+            }
+
+            renderPreviewTable(duplicateFlagCount);
+        }
+
+        function renderPreviewTable(duplicateCount) {
+            const tbody = document.getElementById('preview-tbody');
+            tbody.innerHTML = '';
+
+            previewParsedRecords.forEach(r => {
+                const statusBadge = r.duplicate 
+                    ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px] flex items-center w-max"><i class="fa-solid fa-clone mr-1"></i> Duplicate Flagged</span>`
+                    : `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] flex items-center w-max"><i class="fa-solid fa-check mr-1"></i> Ready</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors ${r.duplicate ? 'bg-amber-50/40' : ''}">
+                        <td class="py-3 px-4">${statusBadge}</td>
+                        <td class="py-3 px-4 font-mono">${r.date}</td>
+                        <td class="py-3 px-4 font-bold text-blue-600">${r.wagonNumber}</td>
+                        <td class="py-3 px-4">${r.wagonType}</td>
+                        <td class="py-3 px-4 font-medium">${r.component}</td>
+                        <td class="py-3 px-4 text-slate-600 truncate max-w-xs">${r.defect}</td>
+                        <td class="py-3 px-4">${r.location}</td>
+                    </tr>
+                `;
+            });
+
+            const statusBadgeContainer = document.getElementById('extraction-status-badge');
+            if(duplicateCount > 0) {
+                statusBadgeContainer.classList.remove('hidden');
+                document.getElementById('duplicate-warning-count').innerText = duplicateCount;
+            } else {
+                statusBadgeContainer.classList.add('hidden');
+            }
+
+            const ingestBtn = document.getElementById('btn-ingest');
+            ingestBtn.disabled = false;
+            ingestBtn.classList.remove('bg-slate-300', 'text-slate-500', 'cursor-not-allowed');
+            ingestBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white', 'shadow-md');
+
+            document.getElementById('preview-summary-text').innerText = `Extracted ${previewParsedRecords.length} records. (${duplicateCount} duplicate records identified and will be blocked).`;
+            showToast(`Extraction complete! Found ${previewParsedRecords.length} records.`, "success");
+        }
+
+        function confirmIngestion() {
+            let newAdded = 0;
+            let duplicatesBlocked = 0;
+
+            previewParsedRecords.forEach(r => {
+                if(r.duplicate) {
+                    duplicatesBlocked++;
+                    duplicatesPreventedCount++;
+                } else {
+                    databaseRecords.push({
+                        id: databaseRecords.length + 1,
+                        date: r.date,
+                        wagonNumber: r.wagonNumber,
+                        wagonType: r.wagonType,
+                        component: r.component,
+                        defect: r.defect,
+                        location: r.location,
+                        duplicate: false,
+                        sourceText: r.sourceText
+                    });
+                    newAdded++;
+                }
+            });
+
+            showToast(`Ingestion Successful! Added ${newAdded} records. Blocked ${duplicatesBlocked} duplicates.`, "success");
+            
+            // Reset preview
+            previewParsedRecords = [];
+            document.getElementById('preview-tbody').innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400"><i class="fa-solid fa-circle-check text-3xl text-emerald-500 mb-2 block"></i>Ingested successfully! Upload another file to continue.</td></tr>`;
+            document.getElementById('btn-ingest').disabled = true;
+            document.getElementById('btn-ingest').className = "bg-slate-300 text-slate-500 cursor-not-allowed font-bold py-3 px-6 rounded-xl text-sm transition-all shadow-sm flex items-center space-x-2";
+            document.getElementById('extraction-status-badge').classList.add('hidden');
+            document.getElementById('preview-summary-text').innerText = "Ready for ingestion.";
+            document.getElementById('raw-chat-input').value = "";
+
+            renderDashboard();
+            renderDatabaseTable();
+            renderReportsTable();
+        }
+
+        // --- Search & Retrieval Database Logic ---
+        function renderDatabaseTable() {
+            filterDatabase();
+        }
+
+        function filterDatabase() {
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+            const typeFilter = document.getElementById('filter-type').value;
+            const compFilter = document.getElementById('filter-component').value;
+            const dateFilter = document.getElementById('filter-date').value;
+
+            const filtered = databaseRecords.filter(r => {
+                const matchesSearch = r.wagonNumber.toLowerCase().includes(searchQuery) ||
+                                      r.component.toLowerCase().includes(searchQuery) ||
+                                      r.defect.toLowerCase().includes(searchQuery) ||
+                                      r.location.toLowerCase().includes(searchQuery);
+                const matchesType = !typeFilter || r.wagonType === typeFilter;
+                const matchesComp = !compFilter || r.component === compFilter;
+                
+                let matchesDate = true;
+                if(dateFilter === 'today') {
+                    matchesDate = r.date === '2026-06-14';
+                } else if(dateFilter === '7days') {
+                    // mock range check
+                    matchesDate = true; 
+                }
+
+                return matchesSearch && matchesType && matchesComp && matchesDate && !r.duplicate;
+            });
+
+            const tbody = document.getElementById('database-tbody');
+            tbody.innerHTML = '';
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400"><i class="fa-solid fa-magnifying-glass text-2xl mb-2 block"></i>No matching mechanical records found.</td></tr>`;
+            } else {
+                filtered.forEach(r => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="py-3 px-4 font-mono">${r.date}</td>
+                            <td class="py-3 px-4 font-bold text-blue-600">${r.wagonNumber}</td>
+                            <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-xs">${r.wagonType}</span></td>
+                            <td class="py-3 px-4">${r.component}</td>
+                            <td class="py-3 px-4 text-slate-600 truncate max-w-xs">${r.defect}</td>
+                            <td class="py-3 px-4 font-medium">${r.location}</td>
+                            <td class="py-3 px-4 text-center">
+                                <button onclick="openDetailModal(${r.id})" class="p-1.5 bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-600 rounded-lg transition-colors" title="View Details">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            document.getElementById('db-record-count').innerText = `Showing ${filtered.length} of ${databaseRecords.filter(r=>!r.duplicate).length} records`;
+        }
+
+        // --- Detail Modal Logic ---
+        function openDetailModal(id) {
+            const record = databaseRecords.find(r => r.id === id);
+            if(!record) return;
+
+            const modalBody = document.getElementById('modal-body');
+            modalBody.innerHTML = `
+                <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Wagon Number</span>
+                        <span class="font-bold text-blue-600 text-sm">${record.wagonNumber}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Wagon Type</span>
+                        <span class="font-semibold text-slate-700">${record.wagonType}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Component Category</span>
+                        <span class="font-semibold text-slate-700">${record.component}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Incident Date</span>
+                        <span class="font-mono text-slate-700">${record.date}</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold mb-1">Defect / Failure Description</span>
+                    <p class="p-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-medium">${record.defect}</p>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold mb-1">Location / Track Yard</span>
+                    <p class="p-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-medium">${record.location}</p>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold mb-1">Raw WhatsApp Message Source</span>
+                    <p class="p-3 bg-slate-900 text-slate-300 font-mono text-[11px] rounded-xl">${record.sourceText}</p>
+                </div>
+            `;
+
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        function simulateAttachmentDownload() {
+            showToast("Downloading verified attachment report (.PDF) successfully!", "success");
+            closeModal();
+        }
+
+        // --- Reporting Logic ---
+        function renderReportsTable() {
+            const tbody = document.getElementById('report-tbody');
+            tbody.innerHTML = '';
+
+            const nonDuplicates = databaseRecords.filter(r => !r.duplicate);
+            const compCounts = {};
+            nonDuplicates.forEach(r => {
+                compCounts[r.component] = (compCounts[r.component] || 0) + 1;
+            });
+
+            const totalCount = nonDuplicates.length || 1;
+
+            Object.entries(compCounts).forEach(([comp, count], idx) => {
+                const percentage = Math.round((count / totalCount) * 100);
+                const badgeColor = count > 1 ? 'bg-rose-100 text-rose-800' : 'bg-blue-100 text-blue-800';
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-3 px-4 font-bold text-slate-800">${comp}</td>
+                        <td class="py-3 px-4 text-center font-bold">${count}</td>
+                        <td class="py-3 px-4 text-center font-mono">${percentage}%</td>
+                        <td class="py-3 px-4"><span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${badgeColor}">${count > 1 ? 'High Frequency' : 'Standard'}</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function generateReport() {
+            const reportType = document.getElementById('report-type').value;
+            const titles = {
+                'component': 'Component-wise Failure Summary',
+                'wagon': 'Wagon-wise Incident Frequency Report',
+                'date': 'Date-wise WhatsApp Ingestion Report',
+                'location': 'Yard & Location Defect Breakdown'
+            };
+            document.getElementById('report-output-title').innerText = titles[reportType] || 'Generated Report';
+            renderReportsTable();
+            showToast("Report generated and updated successfully!", "success");
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function exportDatabaseCSV() {
+            showToast("Central Database exported as CSV successfully!", "success");
+        }
+
+        function loadSampleData() {
+            showToast("Demo database state reset successfully.", "info");
+            renderDashboard();
+            renderDatabaseTable();
+            renderReportsTable();
+        }
+
+        // --- Toast Notification Helper ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-rose-600' : type === 'info' ? 'bg-blue-600' : 'bg-slate-900';
+            const icon = type === 'error' ? 'fa-circle-exclamation' : type === 'info' ? 'fa-circle-info' : 'fa-circle-check';
+
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 text-xs font-semibold pointer-events-auto fade-in transition-all`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
